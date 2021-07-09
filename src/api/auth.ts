@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const authCredentials = {
-  refresh_token: "059c420e-7424-431f-b23b-af0ecabfe7b8",
+  refresh_token: process.env.REACT_APP_REFRESH_TOKEN,
   grant_type: "refresh_token",
 };
 

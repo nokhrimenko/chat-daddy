@@ -1,6 +1,6 @@
 import React from "react";
 import MessageCountComponent from "@components/SideBarComponents/MessageCountComponent/MessageCountComponent";
-import { IAction, ISideBarState } from "@containers/SideBar/SideBarContainer";
+import { IAction, ISideBarState } from "src/types/commonTypes";
 
 interface IMessageCountContainer {
   dispatch: (payload: IAction) => void;

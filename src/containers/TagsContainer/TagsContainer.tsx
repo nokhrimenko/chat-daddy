@@ -1,6 +1,6 @@
 import React from "react";
 import Tags from "@containers/Tags/Tags";
-import { IAction, ISideBarState } from "@containers/SideBar/SideBarContainer";
+import { IAction, ISideBarState } from "src/types/commonTypes";
 
 import styles from "./TagsContainer.module.scss";
 

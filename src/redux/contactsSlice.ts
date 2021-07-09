@@ -1,19 +1,41 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getAccessToken } from "src/api/auth";
-import { getAllTags, getFirstContacts } from "src/api/Api";
+import {
+  getAllTags,
+  getContactsWithParams,
+  getFirstContacts,
+  getNextPage,
+} from "src/api/Api";
 import { RootState } from "src/app/store";
-import { makeStringFromTagObject } from "@helpers/helpers";
-import { ISideBarState } from "@containers/SideBar/SideBarContainer";
+import { ITag, makeStringFromTagObject } from "@helpers/helpers";
+import { ISideBarState } from "src/types/commonTypes";
+
+interface IContacts {
+  id: string;
+  type: string;
+  name: string;
+  phoneNumber: string;
+  platformNames: string[];
+  messagesSent: number;
+  messagesReceived: number;
+  assignee: string;
+  tags: ITag[];
+  chats: string[];
+  img: {
+    url: string;
+  };
+}
 
 interface IContactsSlide {
-  contacts: any[];
+  contacts: IContacts[];
   loading: boolean;
   accessToken: string;
-  lastContactNumber: number;
+  nextPage: string;
   totalCount: number;
   tags: string[];
   filters: ISideBarState;
   selectedContacts: number[];
+  search: string;
 }
 
 const filtersInitialState = {
@@ -24,55 +46,15 @@ const filtersInitialState = {
 };
 
 const initialState: IContactsSlide = {
-  contacts: [
-    {
-      id: 4718633,
-      type: "individual",
-      name: "string",
-      phoneNumber: "string",
-      platformNames: [],
-      messagesSent: 0,
-      messagesReceived: 0,
-      assignee: null,
-      tags: [
-        {
-          name: "string",
-        },
-      ],
-      chats: [],
-    },
-    {
-      id: 1811710,
-      type: "individual",
-      name: "Danny Ho",
-      phoneNumber: "85268287168",
-      platformNames: [],
-      messagesSent: 0,
-      messagesReceived: 0,
-      assignee: null,
-      tags: [],
-      chats: [],
-    },
-    {
-      id: 1811691,
-      type: "individual",
-      name: "Cherry Kwan",
-      phoneNumber: "85263891688",
-      platformNames: [],
-      messagesSent: 0,
-      messagesReceived: 0,
-      assignee: null,
-      tags: [],
-      chats: [],
-    },
-  ],
+  contacts: [],
   loading: false,
   accessToken: "",
-  lastContactNumber: 0,
+  nextPage: "",
   totalCount: 0,
   tags: ["test", "test2"],
   filters: filtersInitialState,
   selectedContacts: [],
+  search: "",
 };
 
 export const initializeRedux = createAsyncThunk(
@@ -88,6 +70,45 @@ export const initializeRedux = createAsyncThunk(
       contacts: contactsData.contacts,
       totalCount: contactsData.totalCount,
       tags: formattedTags,
+      nextPage: contactsData.nextPage,
+    };
+  }
+);
+
+export const getNewContactsWithFilter = createAsyncThunk(
+  "contacts/getNewContacts",
+  async (_, thunkAPI) => {
+    const {
+      contacts: { accessToken, filters, nextPage, search },
+    } = thunkAPI.getState() as any;
+
+    const contactsData = await getContactsWithParams(
+      accessToken,
+      filters,
+      nextPage,
+      search
+    );
+
+    return {
+      contacts: contactsData.contacts,
+      totalCount: contactsData.totalCount,
+    };
+  }
+);
+
+export const getNewPage = createAsyncThunk(
+  "contacts/getNewPage",
+  async (_, thunkAPI) => {
+    const {
+      contacts: { accessToken, filters, nextPage },
+    } = thunkAPI.getState() as any;
+
+    const contactsData = await getNextPage(accessToken, nextPage, filters);
+
+    return {
+      contacts: contactsData.contacts,
+      totalCount: contactsData.totalCount,
+      nextPage: contactsData.nextPage,
     };
   }
 );
@@ -115,6 +136,12 @@ export const contactsSlice = createSlice({
         state.selectedContacts = Array.from(Array(allAvailableContacts).keys());
       }
     },
+    clearFilter: (state) => {
+      state.filters = filtersInitialState;
+    },
+    setSearch: (state, action) => {
+      state.search = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -126,21 +153,46 @@ export const contactsSlice = createSlice({
 
         state.accessToken = action.payload.token;
         state.contacts = action.payload.contacts;
-        state.lastContactNumber = 30;
+        state.nextPage = action.payload.nextPage;
         state.totalCount = action.payload.totalCount;
 
         state.tags = action.payload.tags;
+      })
+      .addCase(getNewContactsWithFilter.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getNewContactsWithFilter.fulfilled, (state, action) => {
+        state.loading = false;
+
+        state.contacts = action.payload.contacts;
+        state.totalCount = action.payload.totalCount;
+
+        state.selectedContacts = [];
+      })
+      .addCase(getNewPage.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getNewPage.fulfilled, (state, action) => {
+        state.loading = false;
+
+        state.contacts = [...state.contacts, ...action.payload.contacts];
+        state.totalCount = action.payload.totalCount;
+        state.nextPage = action.payload.nextPage;
+
+        state.selectedContacts = [];
       });
   },
 });
 
-export const { addFilter } = contactsSlice.actions;
+export const { addFilter, clearFilter } = contactsSlice.actions;
 export const { selectContact, unSelectContact, selectAll } =
   contactsSlice.actions;
+export const { setSearch } = contactsSlice.actions;
 
 export const selectContacts = (state: RootState) => state.contacts.contacts;
 export const totalCount = (state: RootState) => state.contacts.totalCount;
 export const allTags = (state: RootState) => state.contacts.tags;
+export const isLoading = (state: RootState) => state.contacts.loading;
 
 export const selectedContacts = (state: RootState) =>
   state.contacts.selectedContacts;

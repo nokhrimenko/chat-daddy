@@ -1,7 +1,8 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable import/prefer-default-export */
 // eslint-disable-next-line import/no-cycle
-import { IAction, ISideBarState } from "../SideBarContainer";
+
+import { IAction, ISideBarState } from "src/types/commonTypes";
 
 function deleteTag(tags: string[], tag: string) {
   return tags.filter((arrTag) => arrTag !== tag);
@@ -65,6 +66,8 @@ export function reducer(state: ISideBarState, action: IAction) {
           max: action.payload,
         },
       };
+    case "RESET_STATE":
+      return action.payload;
     default:
       return state;
   }

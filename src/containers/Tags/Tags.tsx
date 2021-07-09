@@ -2,9 +2,9 @@ import React from "react";
 import { allTags } from "@redux/contactsSlice";
 import { ListGroup } from "react-bootstrap";
 import { useAppSelector } from "src/app/hooks";
-import { IAction, ISideBarState } from "@containers/SideBar/SideBarContainer";
 import { Trash } from "react-bootstrap-icons";
 import cn from "classnames";
+import { IAction, ISideBarState } from "src/types/commonTypes";
 
 import styles from "./Tags.module.scss";
 

@@ -6,53 +6,40 @@ import MessageCountContainer from "@containers/MessageCountContainer/MessageCoun
 import { Button } from "react-bootstrap";
 import React, { useReducer } from "react";
 import { useAppDispatch } from "src/app/hooks";
-import { addFilter } from "@redux/contactsSlice";
+import {
+  addFilter,
+  clearFilter,
+  getNewContactsWithFilter,
+} from "@redux/contactsSlice";
 import { reducer } from "./helpers/sideBarReducer";
 
 import styles from "./SideBarContainer.module.scss";
 
-interface IMessageFilter {
-  min: number;
-  max: number;
-}
-
-export const sideBarInitialState = {
+const sideBarInitialState = {
   tagsToInclude: [],
   tagsToExclude: [],
   sentMessageFilter: { min: 0, max: 0 },
   receivedMessageFilter: { min: 0, max: 0 },
 };
 
-export interface ISideBarState {
-  tagsToInclude: string[];
-  tagsToExclude: string[];
-  sentMessageFilter: IMessageFilter;
-  receivedMessageFilter: IMessageFilter;
-}
-
-export type ActionType =
-  | "INCLUDE_TAG"
-  | "EXCLUDE_TAG"
-  | "SENT_MESSAGE_FILTER_MIN"
-  | "SENT_MESSAGE_FILTER_MAX"
-  | "RECEIVED_MESSAGE_FILTER_MIN"
-  | "RECEIVED_MESSAGE_FILTER_MAX"
-  | string;
-
-export interface IAction {
-  type: ActionType;
-  payload: string;
-}
-
 const BUTTON_FILTER_LABEL = "Save filters";
+const BUTTON_CLEAR_LABEL = "Clear filters";
 
 const SideBarContainer: React.FC = () => {
   const [state, dispatch] = useReducer<any>(reducer, sideBarInitialState);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const dispatchRedux = useAppDispatch();
 
-  const handleClick = () => {
+  const handleApplyFilter = async () => {
     dispatchRedux(addFilter(state));
+    await dispatchRedux(getNewContactsWithFilter());
+  };
+
+  const handleResetFilter = async () => {
+    dispatchRedux(clearFilter());
+    // @ts-ignore
+    dispatch({ type: "RESET_STATE", payload: sideBarInitialState });
+    await dispatchRedux(getNewContactsWithFilter());
   };
 
   return (
@@ -62,10 +49,13 @@ const SideBarContainer: React.FC = () => {
         <TagsContainer dispatch={dispatch} state={state as any} />
         <MessageCountContainer dispatch={dispatch} state={state as any} />
       </div>
+      <Button onClick={handleResetFilter} variant="danger">
+        {BUTTON_CLEAR_LABEL}
+      </Button>
       <Button
-        onClick={handleClick}
+        onClick={handleApplyFilter}
         variant="success"
-        style={{ backgroundColor: "#0ba391" }}
+        style={{ backgroundColor: "#0ba391", marginTop: "5px" }}
       >
         {BUTTON_FILTER_LABEL}
       </Button>

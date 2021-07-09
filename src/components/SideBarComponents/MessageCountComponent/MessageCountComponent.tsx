@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  ActionType,
-  IAction,
-  ISideBarState,
-} from "@containers/SideBar/SideBarContainer";
 import React from "react";
 import { InputGroup, FormControl } from "react-bootstrap";
+import { IAction, ISideBarState } from "src/types/commonTypes";
 
 interface IMessageCountComponent {
   label: string;
