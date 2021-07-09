@@ -13,6 +13,5 @@ export async function getAccessToken() {
     `${process.env.REACT_APP_BACKEND_SERVER}/token`,
     authCredentials
   );
-  console.log(accessToken);
   return accessToken;
 }

@@ -2,6 +2,7 @@
 import React from "react";
 import { CheckCircle } from "react-bootstrap-icons";
 import { Image, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
+import cn from "classnames";
 import PlusButton from "../PlusButton/PlusButton";
 
 import styles from "./Contact.module.scss";
@@ -11,6 +12,9 @@ interface IContact {
   phoneNumber: string;
   url: string;
   tags: string;
+  isActive: boolean;
+  handleSelect: () => void;
+  handleUnSelect: () => void;
 }
 
 interface IOverlayButton {
@@ -19,32 +23,48 @@ interface IOverlayButton {
 
 const TAGS_LABEL = "Tags";
 
-const renderTooltip = (tags: String) => (
-  <Tooltip id="button-tooltip" placement="auto">
-    {tags}
-  </Tooltip>
-);
-
 const OverlayButton: React.FC<IOverlayButton> = ({ tags }) => (
   <OverlayTrigger
     placement="auto"
-    delay={{ show: 250, hide: 40000 }}
-    overlay={() => renderTooltip(tags)}
+    delay={{ show: 250, hide: 400 }}
+    overlay={
+      <Tooltip id="button-tooltip" placement="auto">
+        {tags}
+      </Tooltip>
+    }
   >
-    <Button size="sm" variant="success">
+    <Button size="sm" variant="success" style={{ backgroundColor: "#0ba391" }}>
       {TAGS_LABEL}
     </Button>
   </OverlayTrigger>
 );
 
-const Contact: React.FC<IContact> = ({ name, phoneNumber, url, tags }) => {
-  const a = 10;
-  console.log(a);
+const Contact: React.FC<IContact> = ({
+  name,
+  phoneNumber,
+  url,
+  tags,
+  isActive,
+  handleUnSelect,
+  handleSelect,
+}) => {
+  const handleSelectClick = () => {
+    if (isActive) {
+      handleUnSelect();
+    } else {
+      handleSelect();
+    }
+  };
 
   return (
-    <div className={styles.container}>
+    <div
+      className={cn({ [styles.container]: true, [styles.active]: isActive })}
+    >
       <div className={styles.leftContainer}>
-        <CheckCircle />
+        <CheckCircle
+          onClick={handleSelectClick}
+          style={{ cursor: "pointer" }}
+        />
         <div className={styles.imageContainer}>
           <Image src={url} />
         </div>
@@ -53,9 +73,9 @@ const Contact: React.FC<IContact> = ({ name, phoneNumber, url, tags }) => {
           <span className={styles.telephone}>{phoneNumber}</span>
         </div>
       </div>
-      <div>
-        <PlusButton size="15px" />
+      <div className={styles.actionContainer}>
         {tags && <OverlayButton tags={tags} />}
+        <PlusButton size="15px" />
       </div>
     </div>
   );

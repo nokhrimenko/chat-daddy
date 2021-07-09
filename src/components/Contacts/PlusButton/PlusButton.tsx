@@ -10,9 +10,10 @@ const PlusButton: React.FC<IPlusButton> = ({ size }) => (
   <PlusCircle
     size={size}
     style={{
-      backgroundColor: "green",
+      backgroundColor: "#0ba391",
       borderRadius: "15px",
       cursor: "pointer",
+      borderColor: "#0ba391",
     }}
   />
 );

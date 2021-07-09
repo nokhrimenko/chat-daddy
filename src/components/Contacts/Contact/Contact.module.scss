@@ -27,3 +27,11 @@
 .name {
   font-weight: bold;
 }
+
+.actionContainer > button {
+  margin-right: 15px;
+}
+
+.active {
+  background: #f3f5f9;
+}

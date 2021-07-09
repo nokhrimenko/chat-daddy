@@ -6,3 +6,7 @@ export interface ITag {
 export function makeStringFromTagObject(tag: ITag) {
   return tag.name;
 }
+
+export function makeStringFromArray(tags: ITag[]) {
+  return tags.map(makeStringFromTagObject).join(",");
+}
